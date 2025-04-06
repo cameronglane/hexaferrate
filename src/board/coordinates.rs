@@ -45,19 +45,66 @@ impl HexCoord {
         q_abs <= 5 && r_abs <= 5 && s_abs <= 5
     }
     
-    // Convert to/from algebraic notation
-    // For a chess-like interface (e.g., "e4" in regular chess)
+    // Convert to algebraic notation (e.g., "e4" in regular chess)
     pub fn to_algebraic(&self) -> String {
-        // This is simplified and would need refinement
-        // Could map to letters and numbers in a spiral pattern from center
-        // For now, just return the raw coordinates
-        format!("({},{})", self.q, self.r)
+        // Map q to letters a-l
+        let file = match self.q {
+            -5 => 'a',
+            -4 => 'b',
+            -3 => 'c',
+            -2 => 'd',
+            -1 => 'e',
+            0 => 'f',
+            1 => 'g',
+            2 => 'h',
+            3 => 'i',
+            4 => 'j',
+            5 => 'k',
+            _ => '?',
+        };
+        
+        // Map r to numbers 1-11, with proper offset
+        let rank = 6 - self.r;
+        
+        format!("{}{}", file, rank)
     }
     
+    // Parse algebraic notation to coordinates
     pub fn from_algebraic(notation: &str) -> Option<Self> {
-        // Would need parsing logic for your chosen notation
-        // For now, stub implementation
-        None
+        if notation.len() < 2 {
+            return None;
+        }
+        
+        let mut chars = notation.chars();
+        let file = chars.next().unwrap().to_lowercase().next().unwrap();
+        let rank_str: String = chars.collect();
+        let rank = rank_str.parse::<i32>().ok()?;
+        
+        // Map file letter to q coordinate
+        let q = match file {
+            'a' => -5,
+            'b' => -4,
+            'c' => -3,
+            'd' => -2,
+            'e' => -1,
+            'f' => 0,
+            'g' => 1,
+            'h' => 2,
+            'i' => 3,
+            'j' => 4,
+            'k' => 5,
+            _ => return None,
+        };
+        
+        // Map rank to r coordinate with proper offset
+        let r = 6 - rank;
+        
+        let coord = HexCoord::new(q, r);
+        if coord.is_valid() {
+            Some(coord)
+        } else {
+            None
+        }
     }
 }
 
